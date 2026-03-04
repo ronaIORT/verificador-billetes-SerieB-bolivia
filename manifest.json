@@ -1,0 +1,51 @@
+{
+  "name": "Verificador de Billetes Bolivia",
+  "short_name": "Verificador",
+  "description": "Verifica si tu billete de la Serie B de Bolivia está inhabilitado",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a237e",
+  "theme_color": "#1a237e",
+  "orientation": "portrait",
+  "scope": "/",
+  "lang": "es-BO",
+  "icons": [
+    {
+      "src": "icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["finance", "utilities"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Verificar Bs 10",
+      "short_name": "Bs 10",
+      "description": "Verificar billete de 10 Bolivianos",
+      "url": "/?denom=10",
+      "icons": [{ "src": "icons/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Verificar Bs 20",
+      "short_name": "Bs 20",
+      "description": "Verificar billete de 20 Bolivianos",
+      "url": "/?denom=20",
+      "icons": [{ "src": "icons/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Verificar Bs 50",
+      "short_name": "Bs 50",
+      "description": "Verificar billete de 50 Bolivianos",
+      "url": "/?denom=50",
+      "icons": [{ "src": "icons/icon-192x192.png", "sizes": "192x192" }]
+    }
+  ]
+}
