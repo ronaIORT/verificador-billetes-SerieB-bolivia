@@ -3,7 +3,7 @@
  * Implementa estrategia Cache First para funcionamiento offline
  */
 
-const CACHE_NAME = 'verificador-billetes-v2';
+const CACHE_NAME = 'verificador-billetes-2026.03.07-00.00';
 const DEBUG = false;
 
 const BASE_PATH = self.location.pathname.replace('/sw.js', '').replace(/\/$/, '');
@@ -11,6 +11,7 @@ const BASE_PATH = self.location.pathname.replace('/sw.js', '').replace(/\/$/, ''
 const STATIC_ASSETS = [
     `${BASE_PATH}/index.html`,
     `${BASE_PATH}/manifest.json`,
+    `${BASE_PATH}/version.json`,
     `${BASE_PATH}/css/style.css`,
     `${BASE_PATH}/js/app.js`,
     `${BASE_PATH}/js/db.js`,
