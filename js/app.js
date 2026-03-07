@@ -395,10 +395,50 @@ async function registerServiceWorker() {
         try {
             const registration = await navigator.serviceWorker.register('./sw.js');
             console.log('Service Worker registrado:', registration.scope);
+            
+            // Detectar actualizaciones disponibles
+            registration.addEventListener('updatefound', () => {
+                const newWorker = registration.installing;
+                if (newWorker) {
+                    newWorker.addEventListener('statechange', () => {
+                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            showUpdateNotification();
+                        }
+                    });
+                }
+            });
+            
+            // Verificar si ya hay una actualización esperando
+            if (registration.waiting) {
+                showUpdateNotification();
+            }
         } catch (error) {
             console.error('Error al registrar Service Worker:', error);
         }
     }
+}
+
+/**
+ * Muestra notificación de actualización disponible
+ */
+function showUpdateNotification() {
+    const existingBanner = document.getElementById('update-banner');
+    if (existingBanner) return;
+    
+    const banner = document.createElement('div');
+    banner.id = 'update-banner';
+    banner.innerHTML = `
+        <span>Nueva versión disponible</span>
+        <button id="btn-update-app">Actualizar</button>
+    `;
+    document.body.appendChild(banner);
+    
+    document.getElementById('btn-update-app').addEventListener('click', () => {
+        if (navigator.serviceWorker.controller) {
+            navigator.serviceWorker.controller.postMessage({ type: 'SKIP_WAITING' });
+        }
+        window.location.reload();
+    });
 }
 
 // Iniciar la aplicación cuando el DOM esté listo
