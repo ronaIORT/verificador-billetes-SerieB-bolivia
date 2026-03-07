@@ -14,6 +14,7 @@ Una Progressive Web App que permite verificar si un billete de la Serie B de Bol
 - **📱 Instalable** - Se puede agregar a la pantalla de inicio como app nativa
 - **🔌 Modo offline** - Funciona sin conexión a internet
 - **🎨 Diseño responsive** - Optimizado para móviles
+- **⚡ Accesos rápidos** - Shortcuts para verificar directamente Bs 10, 20 o 50
 
 ## 🚀 Demo
 
@@ -39,7 +40,7 @@ Abre la aplicación en: `[URL de producción]`
 ## 📁 Estructura del Proyecto
 
 ```
-verificador-bolivia-pwa/
+serie-B/
 ├── index.html            # Página principal (SPA)
 ├── manifest.json         # Configuración PWA
 ├── sw.js                 # Service Worker
@@ -68,7 +69,7 @@ verificador-bolivia-pwa/
 
 ```bash
 # Clonar o descargar el proyecto
-cd verificador-bolivia-pwa
+cd serie-B
 
 # Instalar serve globalmente (solo una vez)
 npm install -g serve
@@ -100,18 +101,23 @@ Los datos provienen del documento oficial del BCB y Ministerio de Economía. Inc
 
 ### Billetes de 10 Bolivianos
 
-- 12 rangos de números inhabilitados
-- Rango principal: 77100001 - 109850000
+- **12 rangos** de números inhabilitados
+- Rangos más amplios: 78900001 - 96350000 y 96350001 - 96800000
+- Rango total aproximado: 77100001 - 109850000
 
 ### Billetes de 20 Bolivianos
 
-- 16 rangos de números inhabilitados
-- Rango principal: 87280145 - 120950000
+- **16 rangos** de números inhabilitados
+- Rango más amplio: 87280145 - 91646549
+- Rango total aproximado: 87280145 - 120950000
 
 ### Billetes de 50 Bolivianos
 
-- 10 rangos de números inhabilitados
-- Rango principal: 67250001 - 92250000
+- **10 rangos** de números inhabilitados
+- Rango más amplio: 76310012 - 85139995
+- Rango total aproximado: 67250001 - 92250000
+
+> 💡 **Tip**: Los datos se almacenan en `data/blacklist.json` y pueden actualizarse según las listas oficiales del BCB.
 
 ## 🔧 Cómo Funciona
 

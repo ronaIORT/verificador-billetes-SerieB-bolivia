@@ -4,25 +4,30 @@
  */
 
 const CACHE_NAME = 'verificador-billetes-v1';
+const DEBUG = false;
 
-// Archivos a cachear para funcionamiento offline
+const BASE_PATH = self.location.pathname.replace('/sw.js', '').replace(/\/$/, '');
+
 const STATIC_ASSETS = [
-    './',
-    './index.html',
-    './manifest.json',
-    './css/style.css',
-    './js/app.js',
-    './js/db.js',
-    './js/scanner.js',
-    './js/validator.js',
-    './data/blacklist.json',
-    './icons/icon-192x192.png',
-    './icons/icon-512x512.png'
+    `${BASE_PATH}/index.html`,
+    `${BASE_PATH}/manifest.json`,
+    `${BASE_PATH}/css/style.css`,
+    `${BASE_PATH}/js/app.js`,
+    `${BASE_PATH}/js/db.js`,
+    `${BASE_PATH}/js/scanner.js`,
+    `${BASE_PATH}/js/validator.js`,
+    `${BASE_PATH}/icons/icon-192x192.png`,
+    `${BASE_PATH}/icons/icon-512x512.png`
 ];
 
-// CDN assets to cache
+const DYNAMIC_ASSETS = [
+    `${BASE_PATH}/data/blacklist.json`
+];
+
 const CDN_ASSETS = [
-    'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'
+    'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js',
+    'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/worker.min.js',
+    'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/worker-script.min.js'
 ];
 
 /**
