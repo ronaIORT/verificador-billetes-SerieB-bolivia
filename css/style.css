@@ -319,6 +319,59 @@ body {
     object-fit: cover;
 }
 
+.camera-status {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: var(--color-white);
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-radius: var(--border-radius);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-size: 0.9rem;
+    z-index: 10;
+    transition: opacity var(--transition-normal);
+}
+
+.camera-status.active {
+    display: none;
+}
+
+.camera-status.error {
+    background: rgba(244, 67, 54, 0.9);
+}
+
+.camera-status.loading .camera-status-icon {
+    animation: spin 1s linear infinite;
+}
+
+.camera-status-icon {
+    font-size: 1.2rem;
+}
+
+.camera-status.error .camera-status-icon::before {
+    content: "⚠️";
+}
+
+.camera-retry {
+    background: var(--color-white);
+    color: var(--color-danger-dark);
+    border: none;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--spacing-xs);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-left: var(--spacing-sm);
+}
+
+.camera-retry:active {
+    transform: scale(0.95);
+}
+
 .scan-overlay {
     position: absolute;
     top: 0;

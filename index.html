@@ -63,8 +63,13 @@
             
             <div class="scan-area">
                 <div class="camera-container" id="camera-container">
-                    <video id="camera-preview" autoplay playsinline></video>
+                    <video id="camera-preview" autoplay playsinline muted></video>
                     <canvas id="capture-canvas" style="display: none;"></canvas>
+                    <div class="camera-status" id="camera-status">
+                        <span class="camera-status-icon">📷</span>
+                        <span class="camera-status-text">Iniciando cámara...</span>
+                        <button class="camera-retry" id="btn-retry-camera" style="display: none;">Reintentar</button>
+                    </div>
                     <div class="scan-overlay">
                         <div class="scan-guide">
                             <p>Alinea el número de serie aquí</p>

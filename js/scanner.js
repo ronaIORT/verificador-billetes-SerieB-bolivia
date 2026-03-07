@@ -24,8 +24,18 @@ export function initScanner(video, canvas) {
  */
 export async function startCamera() {
     try {
+        // Verificar contexto seguro
+        if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+            throw new Error('La cámara requiere conexión segura (HTTPS).');
+        }
+        
         // Detener cualquier stream anterior
         stopCamera();
+        
+        // Verificar soporte de cámara
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            throw new Error('Tu navegador no soporta acceso a la cámara.');
+        }
         
         // Solicitar acceso a la cámara trasera
         const constraints = {
@@ -41,6 +51,8 @@ export async function startCamera() {
         
         if (videoElement) {
             videoElement.srcObject = videoStream;
+            // Forzar reproducción con muted para dispositivos móviles
+            videoElement.muted = true;
             await videoElement.play();
         }
         
@@ -50,11 +62,17 @@ export async function startCamera() {
         console.error('Error al iniciar cámara:', error);
         
         if (error.name === 'NotAllowedError') {
-            throw new Error('Permiso de cámara denegado. Por favor, permite el acceso a la cámara.');
+            throw new Error('Permiso denegado. Habilita la cámara en configuración.');
         } else if (error.name === 'NotFoundError') {
-            throw new Error('No se encontró ninguna cámara en el dispositivo.');
+            throw new Error('No se encontró cámara en el dispositivo.');
+        } else if (error.name === 'NotReadableError') {
+            throw new Error('La cámara está en uso por otra aplicación.');
+        } else if (error.name === 'OverconstrainedError') {
+            throw new Error('Cámara no compatible con los requisitos.');
+        } else if (error.name === 'SecurityError') {
+            throw new Error('Acceso a cámara bloqueado por seguridad.');
         } else {
-            throw new Error('Error al acceder a la cámara: ' + error.message);
+            throw new Error(error.message || 'Error al acceder a la cámara.');
         }
     }
 }

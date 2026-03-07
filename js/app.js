@@ -34,6 +34,8 @@ const elements = {
     denominationTitle: null,
     cameraPreview: null,
     captureCanvas: null,
+    cameraStatus: null,
+    btnRetryCamera: null,
     btnCapture: null,
     manualInput: null,
     btnVerifyManual: null,
@@ -98,6 +100,8 @@ function cacheElements() {
     elements.denominationTitle = document.getElementById('denomination-title');
     elements.cameraPreview = document.getElementById('camera-preview');
     elements.captureCanvas = document.getElementById('capture-canvas');
+    elements.cameraStatus = document.getElementById('camera-status');
+    elements.btnRetryCamera = document.getElementById('btn-retry-camera');
     elements.btnCapture = document.getElementById('btn-capture');
     elements.manualInput = document.getElementById('manual-input');
     elements.btnVerifyManual = document.getElementById('btn-verify-manual');
@@ -129,6 +133,9 @@ function setupEventListeners() {
     elements.btnBackScan.addEventListener('click', () => {
         goToScreen('welcome');
     });
+    
+    // Botón reintentar cámara
+    elements.btnRetryCamera.addEventListener('click', retryCamera);
     
     // Botón capturar/escanear
     elements.btnCapture.addEventListener('click', handleCapture);
@@ -173,12 +180,57 @@ async function selectDenomination(value) {
     // Inicializar escáner
     initScanner(elements.cameraPreview, elements.captureCanvas);
     
+    // Mostrar estado de carga
+    updateCameraStatus('loading', 'Iniciando cámara...');
+    
     // Intentar iniciar cámara
     try {
         await startCamera();
+        updateCameraStatus('active');
     } catch (error) {
         console.warn('No se pudo iniciar la cámara:', error.message);
-        // La entrada manual sigue disponible
+        updateCameraStatus('error', error.message || 'Cámara no disponible');
+    }
+}
+
+/**
+ * Actualiza el indicador de estado de la cámara
+ * @param {string} status - Estado: 'loading', 'active', 'error'
+ * @param {string} message - Mensaje a mostrar (opcional)
+ */
+function updateCameraStatus(status, message = '') {
+    const statusEl = elements.cameraStatus;
+    const retryBtn = elements.btnRetryCamera;
+    if (!statusEl) return;
+    
+    statusEl.classList.remove('active', 'loading', 'error');
+    
+    if (status === 'active') {
+        statusEl.classList.add('active');
+        if (retryBtn) retryBtn.style.display = 'none';
+    } else if (status === 'loading') {
+        statusEl.classList.add('loading');
+        statusEl.querySelector('.camera-status-text').textContent = message || 'Cargando...';
+        if (retryBtn) retryBtn.style.display = 'none';
+    } else if (status === 'error') {
+        statusEl.classList.add('error');
+        statusEl.querySelector('.camera-status-text').textContent = message || 'Error de cámara';
+        if (retryBtn) retryBtn.style.display = 'inline-block';
+    }
+}
+
+/**
+ * Reintenta iniciar la cámara
+ */
+async function retryCamera() {
+    updateCameraStatus('loading', 'Reintentando...');
+    
+    try {
+        await startCamera();
+        updateCameraStatus('active');
+    } catch (error) {
+        console.warn('Error al reintentar cámara:', error.message);
+        updateCameraStatus('error', error.message || 'Cámara no disponible');
     }
 }
 
@@ -271,7 +323,7 @@ function showResult(result) {
  * Navega a una pantalla específica
  * @param {string} screenName - Nombre de la pantalla ('welcome', 'scan', 'result')
  */
-function goToScreen(screenName) {
+async function goToScreen(screenName) {
     // Ocultar todas las pantallas
     document.querySelectorAll('.screen').forEach(screen => {
         screen.classList.remove('active');
@@ -293,7 +345,13 @@ function goToScreen(screenName) {
     
     // Reiniciar cámara si volvemos a escaneo
     if (screenName === 'scan' && state.currentDenomination) {
-        startCamera().catch(() => {});
+        updateCameraStatus('loading', 'Iniciando cámara...');
+        try {
+            await startCamera();
+            updateCameraStatus('active');
+        } catch (error) {
+            updateCameraStatus('error', error.message || 'Cámara no disponible');
+        }
     }
 }
 
