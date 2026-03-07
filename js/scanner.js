@@ -3,41 +3,28 @@
  * Gestiona el acceso a la cámara y el reconocimiento OCR con Tesseract.js
  */
 
-// Estado del escáner
 let videoStream = null;
 let videoElement = null;
 let canvasElement = null;
+let flashEnabled = false;
 
-/**
- * Inicializa el escáner con los elementos del DOM
- * @param {HTMLVideoElement} video - Elemento video para la vista previa
- * @param {HTMLCanvasElement} canvas - Elemento canvas para captura
- */
 export function initScanner(video, canvas) {
     videoElement = video;
     canvasElement = canvas;
 }
 
-/**
- * Inicia la cámara trasera del dispositivo
- * @returns {Promise<boolean>} true si se inició correctamente
- */
 export async function startCamera() {
     try {
-        // Verificar contexto seguro
         if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
             throw new Error('La cámara requiere conexión segura (HTTPS).');
         }
         
-        // Detener cualquier stream anterior
         stopCamera();
         
-        // Verificar soporte de cámara
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
             throw new Error('Tu navegador no soporta acceso a la cámara.');
         }
         
-        // Solicitar acceso a la cámara trasera
         const constraints = {
             video: {
                 facingMode: { ideal: 'environment' },
@@ -51,11 +38,11 @@ export async function startCamera() {
         
         if (videoElement) {
             videoElement.srcObject = videoStream;
-            // Forzar reproducción con muted para dispositivos móviles
             videoElement.muted = true;
             await videoElement.play();
         }
         
+        flashEnabled = false;
         console.log('Cámara iniciada correctamente');
         return true;
     } catch (error) {
@@ -77,9 +64,6 @@ export async function startCamera() {
     }
 }
 
-/**
- * Detiene la cámara y libera recursos
- */
 export function stopCamera() {
     if (videoStream) {
         videoStream.getTracks().forEach(track => track.stop());
@@ -89,12 +73,61 @@ export function stopCamera() {
     if (videoElement) {
         videoElement.srcObject = null;
     }
+    
+    flashEnabled = false;
 }
 
-/**
- * Captura una imagen del video
- * @returns {Promise<string>} Base64 de la imagen capturada
- */
+export async function toggleFlash() {
+    if (!videoStream) {
+        return false;
+    }
+    
+    const track = videoStream.getVideoTracks()[0];
+    if (!track) {
+        return false;
+    }
+    
+    try {
+        const capabilities = track.getCapabilities();
+        
+        if (!capabilities.torch) {
+            console.warn('Flash/torch no soportado en este dispositivo');
+            return false;
+        }
+        
+        flashEnabled = !flashEnabled;
+        
+        await track.applyConstraints({
+            advanced: [{ torch: flashEnabled }]
+        });
+        
+        console.log(`Flash ${flashEnabled ? 'encendido' : 'apagado'}`);
+        return true;
+    } catch (error) {
+        console.error('Error al controlar flash:', error);
+        flashEnabled = false;
+        return false;
+    }
+}
+
+export function isFlashEnabled() {
+    return flashEnabled;
+}
+
+export async function canUseFlash() {
+    if (!videoStream) return false;
+    
+    const track = videoStream.getVideoTracks()[0];
+    if (!track) return false;
+    
+    try {
+        const capabilities = track.getCapabilities();
+        return !!capabilities.torch;
+    } catch {
+        return false;
+    }
+}
+
 export async function captureImage() {
     if (!videoElement || !canvasElement) {
         throw new Error('Escáner no inicializado');
@@ -104,26 +137,16 @@ export async function captureImage() {
     const canvas = canvasElement;
     const ctx = canvas.getContext('2d');
     
-    // Configurar dimensiones del canvas
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     
-    // Capturar frame actual del video
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     
-    // Retornar como base64
     return canvas.toDataURL('image/png');
 }
 
-/**
- * Realiza OCR sobre una imagen usando Tesseract.js
- * @param {string} imageData - Imagen en base64 o URL
- * @param {Function} onProgress - Callback para progreso (opcional)
- * @returns {Promise<string>} Texto reconocido
- */
 export async function performOCR(imageData, onProgress = null) {
     try {
-        // Verificar que Tesseract está disponible
         if (typeof Tesseract === 'undefined') {
             throw new Error('Tesseract.js no está cargado. Verifica tu conexión a internet.');
         }
@@ -147,36 +170,27 @@ export async function performOCR(imageData, onProgress = null) {
     }
 }
 
-/**
- * Extrae el número de serie del texto reconocido
- * @param {string} text - Texto del OCR
- * @returns {string|null} Número de serie extraído o null
- */
 export function extractSerialNumber(text) {
     if (!text) return null;
     
-    // Limpiar el texto
     const cleanText = text.trim();
     
-    // Buscar secuencias de 7-9 dígitos (típico de números de serie)
     const patterns = [
-        /\b(\d{8,9})\b/g,           // 8-9 dígitos seguidos
-        /\b(\d{7,9})\b/g,           // 7-9 dígitos
-        /(\d{8})/g,                  // Exactamente 8 dígitos
-        /(\d{9})/g,                  // Exactamente 9 dígitos
+        /\b(\d{8,9})\b/g,
+        /\b(\d{7,9})\b/g,
+        /(\d{8})/g,
+        /(\d{9})/g,
     ];
     
     for (const pattern of patterns) {
         const matches = cleanText.match(pattern);
         if (matches && matches.length > 0) {
-            // Tomar el match más largo
             const longest = matches.reduce((a, b) => a.length >= b.length ? a : b);
             console.log(`Número de serie extraído: ${longest}`);
             return longest;
         }
     }
     
-    // Si no encontramos con patrones, intentar extraer todos los dígitos
     const allDigits = cleanText.replace(/\D/g, '');
     if (allDigits.length >= 7 && allDigits.length <= 9) {
         console.log(`Número extraído de dígitos: ${allDigits}`);
@@ -187,23 +201,15 @@ export function extractSerialNumber(text) {
     return null;
 }
 
-/**
- * Proceso completo: captura, OCR y extracción
- * @param {Function} onProgress - Callback para progreso
- * @returns {Promise<string|null>} Número de serie o null
- */
 export async function scanAndExtract(onProgress = null) {
-    // Capturar imagen
     if (onProgress) onProgress(0, 'Capturando imagen...');
     const imageData = await captureImage();
     
-    // Realizar OCR
     if (onProgress) onProgress(10, 'Procesando imagen...');
     const ocrText = await performOCR(imageData, (percent) => {
         if (onProgress) onProgress(10 + (percent * 0.8), 'Reconociendo texto...');
     });
     
-    // Extraer número
     if (onProgress) onProgress(95, 'Extrayendo número...');
     const serialNumber = extractSerialNumber(ocrText);
     
@@ -212,10 +218,6 @@ export async function scanAndExtract(onProgress = null) {
     return serialNumber;
 }
 
-/**
- * Verifica si el dispositivo tiene cámara
- * @returns {Promise<boolean>}
- */
 export async function hasCamera() {
     try {
         const devices = await navigator.mediaDevices.enumerateDevices();
@@ -225,10 +227,6 @@ export async function hasCamera() {
     }
 }
 
-/**
- * Verifica si el navegador soporta acceso a cámara
- * @returns {boolean}
- */
 export function isCameraSupported() {
     return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
 }

@@ -17,107 +17,91 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <!-- Pantalla de Bienvenida -->
-    <section id="screen-welcome" class="screen active">
-        <div class="container">
-            <header class="header">
-                <div class="logo">
-                    <span class="logo-icon">💵</span>
-                </div>
-                <h1>Verificador de Billetes</h1>
-                <p class="subtitle">Serie B - Bolivia</p>
-            </header>
-            
-            <div class="info-box">
-                <p>Verifica si tu billete está <strong>inhabilitado</strong> según la lista oficial del BCB.</p>
-            </div>
-            
-            <div class="denomination-selector">
-                <h2>Selecciona el valor:</h2>
-                <div class="btn-group">
-                    <button class="btn btn-denomination" data-value="10">
-                        <span class="btn-amount">Bs 10</span>
-                    </button>
-                    <button class="btn btn-denomination" data-value="20">
-                        <span class="btn-amount">Bs 20</span>
-                    </button>
-                    <button class="btn btn-denomination" data-value="50">
-                        <span class="btn-amount">Bs 50</span>
-                    </button>
-                </div>
-            </div>
-            
-            <footer class="footer">
-                <p>Datos oficiales del BCB y Ministerio de Economía</p>
-            </footer>
-        </div>
-    </section>
+    <div class="app-container">
+        <header class="app-header">
+            <h1>Verificador de Billetes</h1>
+            <p class="subtitle">Serie B - Bolivia</p>
+        </header>
 
-    <!-- Pantalla de Escaneo/Entrada -->
-    <section id="screen-scan" class="screen">
-        <div class="container">
-            <header class="header-small">
-                <button class="btn-back" id="btn-back-scan">← Volver</button>
-                <h2 id="denomination-title">Bs 10</h2>
-            </header>
-            
-            <div class="scan-area">
-                <div class="camera-container" id="camera-container">
-                    <video id="camera-preview" autoplay playsinline muted></video>
-                    <canvas id="capture-canvas" style="display: none;"></canvas>
-                    <div class="camera-status" id="camera-status">
-                        <span class="camera-status-icon">📷</span>
-                        <span class="camera-status-text">Iniciando cámara...</span>
-                        <button class="camera-retry" id="btn-retry-camera" style="display: none;">Reintentar</button>
-                    </div>
-                    <div class="scan-overlay">
-                        <div class="scan-guide">
-                            <p>Alinea el número de serie aquí</p>
-                        </div>
+        <section class="camera-section">
+            <div class="camera-container" id="camera-container">
+                <video id="camera-preview" autoplay playsinline muted></video>
+                <canvas id="capture-canvas" style="display: none;"></canvas>
+                <div class="camera-status" id="camera-status">
+                    <span class="camera-status-icon">📷</span>
+                    <span class="camera-status-text">Iniciando cámara...</span>
+                    <button class="camera-retry" id="btn-retry-camera" style="display: none;">Reintentar</button>
+                </div>
+                <div class="scan-overlay">
+                    <div class="scan-guide">
+                        <p>Alinea el número de serie aquí</p>
                     </div>
                 </div>
-                
-                <div class="scan-actions">
-                    <button class="btn btn-primary btn-scan" id="btn-capture">
-                        <span class="btn-icon">📷</span>
-                        <span>Escanear</span>
-                    </button>
+            </div>
+        </section>
+
+        <section class="action-buttons">
+            <button class="btn btn-scan" id="btn-capture">
+                <span class="btn-icon">📷</span>
+                <span>Escanear</span>
+            </button>
+            <button class="btn btn-flash" id="btn-flash">
+                <span class="flash-icon">🔦</span>
+            </button>
+        </section>
+
+        <section class="denomination-section" id="denomination-section">
+            <div class="denomination-selector" id="denomination-selector">
+                <button class="btn btn-denomination" data-value="10">
+                    <span class="btn-amount">Bs 10</span>
+                </button>
+                <button class="btn btn-denomination" data-value="20">
+                    <span class="btn-amount">Bs 20</span>
+                </button>
+                <button class="btn btn-denomination" data-value="50">
+                    <span class="btn-amount">Bs 50</span>
+                </button>
+            </div>
+            
+            <div class="results-container" id="results-container" style="display: none;">
+                <div class="result-card" data-denomination="10">
+                    <span class="result-denomination">Bs 10</span>
+                    <span class="result-status"></span>
+                </div>
+                <div class="result-card" data-denomination="20">
+                    <span class="result-denomination">Bs 20</span>
+                    <span class="result-status"></span>
+                </div>
+                <div class="result-card" data-denomination="50">
+                    <span class="result-denomination">Bs 50</span>
+                    <span class="result-status"></span>
                 </div>
             </div>
-            
-            <div class="manual-entry">
-                <p class="divider-text">— o ingresa manualmente —</p>
-                <div class="input-group">
-                    <input type="text" id="manual-input" placeholder="Número de serie" inputmode="numeric" pattern="[0-9]*" maxlength="9">
-                    <button class="btn btn-secondary" id="btn-verify-manual">Verificar</button>
-                </div>
-            </div>
-            
-            <div class="loading-overlay" id="loading-overlay">
-                <div class="spinner"></div>
-                <p>Procesando...</p>
-            </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Pantalla de Resultado -->
-    <section id="screen-result" class="screen">
-        <div class="container result-container">
-            <div class="result-card" id="result-card">
-                <div class="result-icon" id="result-icon">✓</div>
-                <h2 class="result-title" id="result-title">BILLETE OPERATIVO</h2>
-                <p class="result-number" id="result-number">Serie: 12345678</p>
-                <p class="result-description" id="result-description">Este billete se encuentra en circulación válida.</p>
+        <section class="manual-entry">
+            <p class="divider-text">— o ingresa manualmente —</p>
+            <div class="input-group">
+                <input type="text" id="manual-input" placeholder="Número de serie" inputmode="numeric" pattern="[0-9]*" maxlength="9">
+                <button class="btn btn-secondary" id="btn-verify-manual">Verificar</button>
             </div>
-            
-            <div class="result-actions">
-                <button class="btn btn-primary" id="btn-scan-another">Escanear Otro</button>
-                <button class="btn btn-secondary" id="btn-back-home">Volver al Inicio</button>
-            </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Scripts -->
+        <button class="btn btn-primary btn-reset" id="btn-reset" style="display: none;">
+            Nuevo escaneo
+        </button>
+
+        <div class="serial-display" id="serial-display" style="display: none;">
+            <span class="serial-label">Número detectado:</span>
+            <span class="serial-number" id="serial-number"></span>
+        </div>
+
+        <div class="loading-overlay" id="loading-overlay">
+            <div class="spinner"></div>
+            <p>Procesando...</p>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <script type="module" src="js/app.js"></script>
 </body>
